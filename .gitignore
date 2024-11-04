@@ -162,6 +162,4 @@ cython_debug/
 #.idea/
 =======
 /logs
-/__pycache__
-.env
 /dags/results/*.json
