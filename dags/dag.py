@@ -66,6 +66,45 @@ def batch_import():
     print(response.text)
     assert response.status_code < 300, response.status_code
 
+@task()
+def import_api():
+    schema = {
+      "name": "November Marketing Event Leads",
+      "dateFormat": "DAY_MONTH_YEAR",
+      "files": [
+        {
+          "fileName": "importFile.csv", # should match exactly, or else 400
+          "fileFormat": "CSV",
+          "fileImportPage": {
+            "hasHeader": True, # firstname,lastname,email
+            "columnMappings": [
+              {
+                "columnObjectTypeId": "0-1",
+                "columnName": "First Name",
+                "propertyName": "firstname"
+              },
+              {
+                "columnObjectTypeId": "0-1",
+                "columnName": "Last Name",
+                "propertyName": "lastname"
+              },
+              {
+                "columnObjectTypeId": "0-1",
+                "columnName": "Email",
+                "propertyName": "email",
+                "associationIdentifierColumn": True
+              }        
+            ]
+          }
+        }
+      ]
+    }
+    with open("results/result.json", "rb") as file_stream:
+        response = requests.post(f'{base_url}/crm/v3/imports', headers=headers, files=[('files', file_stream)], data={"importRequest": json.jumps(schema)})
+        # response returns import id, which we can later track
+    print(response.text)
+    assert response.status_code < 300, response.status_code
+
 
 # A DAG represents a workflow, a collection of tasks
 with DAG(dag_id="demo", start_date=datetime.datetime(2024, 4, 10), schedule="0 0 * * *") as dag:
