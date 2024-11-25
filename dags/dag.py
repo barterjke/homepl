@@ -1,4 +1,6 @@
 import json
+import os
+from pathlib import Path
 
 import requests
 import snowflake.connector
@@ -6,6 +8,7 @@ from airflow import DAG
 import datetime
 from airflow.decorators import task
 from dotenv import dotenv_values
+from datetime import date
 
 config = dotenv_values(".env")
 API_KEY = config['API_KEY']
@@ -31,7 +34,12 @@ def export():
         cursor.execute("select * from CALL_CENTER")
         results = cursor.fetchall()
         print(results)
-    with open("results/result.json", "w") as f:
+    today_dir = date.today().strftime("%Y-%m-%d")
+    path = f"../data/{today_dir}/0.json"
+    Path(os.path.dirname(path)).mkdir(
+        parents=True, exist_ok=True
+    )
+    with open(path, "w") as f:
         json.dump(results, f, default=str)
 
 
